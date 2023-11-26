@@ -1,5 +1,5 @@
 from collections import UserDict
-
+import re
 class Field:
     def __init__(self, value):
         self.value = value
@@ -16,16 +16,20 @@ class Name(Field):
         super().__init__(name)
 
 
-
 class Phone(Field):
+
+
     def __init__(self, phone):
         super().__init__(phone)
-
-
-    def validate(self):
-        if self.value and not (isinstance(self.phone, str) and len(self.phone) == 10 and self.phone.isdigit()):
+        if not re.match(r'^\d{10}$', str(self.value)):
             raise ValueError("Phone must be a 10-digit number.")
 
+    def validate(self):
+        if self.value and not (isinstance(self.value, str) and len(self.value) == 10 and self.value.isdigit()):
+            raise ValueError("Phone must be a 10-digit number.")
+
+
+    
 
 class Record:
     def __init__(self, name):
@@ -52,6 +56,8 @@ class Record:
             if p.value == old_phone:
                 p.value = new_phone
                 break
+        raise ValueError(f"{old_phone} - not on the list!!")
+        
 
 
     def find_phone(self, phone):
@@ -70,47 +76,46 @@ class AddressBook(UserDict):
         self.data[record.name.value] = record
 
     def find(self, term):
-        result = []
-        for record_name, record in self.data.items():
-            if term.lower() in record_name.lower():
-                result.append(record)
-        return result
 
+        if term in self.data:
+            return self.data[name]
+        else:
+            return None
     def delete(self, name):
         if name in self.data:
             del self.data[name]
 
 
+if __name__ == "__main__":
+       # Створення нової адресної книги
+    book = AddressBook()
 
-   # Створення нової адресної книги
-book = AddressBook()
+        # Створення запису для John
+    john_record = Record("John")
+    john_record.add_phone("1234567890")
+    john_record.add_phone("5555555555")
 
-    # Створення запису для John
-john_record = Record("John")
-john_record.add_phone("1234567890")
-john_record.add_phone("5555555555")
+        # Додавання запису John до адресної книги
+    book.add_record(john_record)
 
-    # Додавання запису John до адресної книги
-book.add_record(john_record)
+        # Створення та додавання нового запису для Jane
+    jane_record = Record("Jane")
+    jane_record.add_phone("9876543210")
+    book.add_record(jane_record)
 
-    # Створення та додавання нового запису для Jane
-jane_record = Record("Jane")
-jane_record.add_phone("9876543210")
-book.add_record(jane_record)
+        # Виведення всіх записів у книзі
+    for name, record in book.data.items():
+        print(record)
 
-    # Виведення всіх записів у книзі
-for name, record in book.data.items():
-    print(record)
+        # Знаходження та редагування телефону для John
+    john = book.find("John")
+    john.edit_phone("1234567890", "1112223333")
 
-    # Знаходження та редагування телефону для John
-john = book.find("John")
-john.edit_phone("1234567890", "1112223333")
+    print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
 
-print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
+        # Пошук конкретного телефону у записі John
+    found_phone = john.find_phone("5555555555")
+    print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
 
-    # Пошук конкретного телефону у записі John
-found_phone = john.find_phone("5555555555")
-print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
-
-    # Видалення запису Jane
-book.delete("Jane")
+        # Видалення запису Jane
+    book.delete("Jane")
