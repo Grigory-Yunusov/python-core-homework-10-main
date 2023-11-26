@@ -12,15 +12,15 @@ class Field:
 
 class Name(Field):
 
-    def __init__(self, value, name):
-        super().__init__(value)
-        self.name = name
+    def __init__(self, name):
+        super().__init__(name)
+
 
 
 class Phone(Field):
-    def __init__(self, phone, value):
-        super().__init__(value)
-        self.phone = phone
+    def __init__(self, phone):
+        super().__init__(phone)
+
 
     def validate(self):
         if self.value and not (isinstance(self.phone, str) and len(self.phone) == 10 and self.phone.isdigit()):
