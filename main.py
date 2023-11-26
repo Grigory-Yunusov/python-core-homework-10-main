@@ -38,7 +38,10 @@ class Record:
         self.phones.append(phone_field)
 
     def remove_phone(self, phone):
-        self.phones = [p for p in self.phones if p.value != phone]
+        self.phones = list(filter(lambda p: p.value != phone, self.phones))
+
+        # self.phones = [p for p in self.phones if p.value != phone]
+
         # for p in self.phones:
         #     if p.value == phone:
         #         self.phones.remove(p)
