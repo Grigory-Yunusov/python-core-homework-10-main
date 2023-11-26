@@ -1,11 +1,21 @@
 from collections import UserDict
 import re
+from datetime import datetime, timedelta
 class Field:
     def __init__(self, value):
-        self.value = value
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def values(self, new_value):
+        # Дополнительная логика в сеттере.
+        self._value = new_value
 
     def __str__(self):
-        return str(self.value)
+        return str(self._value)
 
     def validate(self):
         pass
@@ -21,21 +31,43 @@ class Phone(Field):
 
     def __init__(self, phone):
         super().__init__(phone)
-        if not re.match(r'^\d{10}$', str(self.value)):
+        if not re.match(r'^\d{10}$', str(self._value)):
             raise ValueError("Phone must be a 10-digit number.")
 
     def validate(self):
-        if self.value and not (isinstance(self.value, str) and len(self.value) == 10 and self.value.isdigit()):
+        if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
             raise ValueError("Phone must be a 10-digit number.")
 
 
-    
+    @Field.value.setter
+    def value(self, new_value):
+        if not isinstance(new_value, str) or not new_value.isdigit():
+            raise ValueError("Phone must be a string containing only digits.")
+        self._value = new_value
+
+
+class Birthday:
+    def __init__(self, birthdate):
+        self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
+
+    @Field.value.setter
+    def value(self, new_value):
+        try:
+            datetime.strptime(new_value, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("Invalid date format!!! Use YYYY-MM-DD.")
+
+        self._value = new_value
+
+
+
+
 
 class Record:
-    def __init__(self, name):
+    def __init__(self, name, birthday=None):
         self.name = Name(name)
         self.phones = []
-
+        self.birthday = Birthday(birthday) if birthday else None
     def add_phone(self, phone):
         phone_field = Phone(phone)
         phone_field.validate()
@@ -55,8 +87,8 @@ class Record:
         for p in self.phones:
             if p.value == old_phone:
                 p.value = new_phone
-                break
-        raise ValueError(f"{old_phone} - not on the list!!")
+                return
+        raise ValueError("not on the list!!")
         
 
 
@@ -68,7 +100,20 @@ class Record:
         return None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
+
+
+    def  days_to_birthday(self):
+        if self.birthday:
+            today = datetime.now().date()
+            next_birthday = datetime(today.year, self.birthday.birthdate.month, self.birthday.birthdate.day).date()
+            if today > next_birthday:
+                next_birthday = datetime(today.year + 1, self.birthday.birthdate.month, self.birthday.birthdate.day).date()
+
+            days_until_birthday = (next_birthday - today).days
+            return days_until_birthday
+        else:
+            return None
 
 
 class AddressBook(UserDict):
@@ -78,13 +123,25 @@ class AddressBook(UserDict):
     def find(self, term):
 
         if term in self.data:
-            return self.data[name]
+            return self.data[term]
         else:
             return None
     def delete(self, name):
         if name in self.data:
             del self.data[name]
 
+    def __iter__(self):
+
+        return iter(self.data.values())
+
+    def iter_n_records(self, n):
+
+        count = 0
+        for record in self.data.values():
+            yield record
+            count += 1
+            if count >= n:
+                break
 
 if __name__ == "__main__":
        # Створення нової адресної книги
