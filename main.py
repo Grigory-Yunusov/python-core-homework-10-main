@@ -47,7 +47,6 @@ class Phone(Field):
 class Birthday(Field):
     def __init__(self, birthdate):
         super().__init__(birthdate)
-        self._value = None
         self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
     @Field.value.setter
@@ -129,19 +128,21 @@ class AddressBook(UserDict):
             del self.data[name]
 
     def __iter__(self):
-
         return iter(self.data.values())
 
-    def iter_n_records(self, n):
-        count = 0
-        for record in self.data.values():
-            yield record
-            count += 1
-            if count >= n:
-                break
+    def iterator(self, item_number):
+        counter = 0
+        result = []
+        for item, record in self.data.items():
+            result.append(record)
+            counter += 1
+            if counter >= item_number:
+                yield result
+                counter = 0
+                result = []
 
 
-# Пример использования
+# Перевірка на коректність веденого номера телефону setter для value класу Phone.
 phone_field = Phone("123456789")
 print(phone_field.value)  # Вивід значення через getter
 
@@ -151,6 +152,7 @@ try:
 except ValueError as e:
     print(e)
 
+# Перевірка на коректність веденого дня народження setter для value класу Birthday.
 birthday_field = Birthday("1990-01-01")
 print(birthday_field.value)  # Вивід значення через getter
 
@@ -161,39 +163,25 @@ except ValueError as e:
     print(e)
 
 
-# Пример использования
-doe = Name("John Doe")
-print(doe.value)  # Вывод значения через getter
-
-doe.value = "Jane Doe"  # Изменение значения через setter
-print(doe.value)  # Вывод измененного значения
-
-doe_phone = Phone("123456789")
-print(doe_phone.value)  # Вывод значения через getter
-
-doe_phone.value = "987654321"  # Изменение значения через setter
-print(doe_phone.value)  # Вывод измененного значения
-
-
-
 # Створення нової адресної книги
 book = AddressBook()
 
 # Створення запису
 john_record = Record("John")
 john_record.add_phone("1234567890")
-john_record.add_phone("5555555555")
+john_record.add_phone("7575757575")
 
 grigi_record = Record("Grigi")
 grigi_record.add_phone("8098465323")
-grigi_record.add_phone("5000000000")
+grigi_record.add_phone("2345678910")
 
 selim_record = Record("Selim")
-selim_record.add_phone("8098465323")
-selim_record.add_phone("5000000000")
+selim_record.add_phone("7098461111")
+selim_record.add_phone("5010101010")
 
 jane_record = Record("Jane")
 jane_record.add_phone("9876543210")
+jane_record.add_phone("7576541010")
 
 # Додавання запису John до адресної книги
 book.add_record(john_record)
@@ -201,29 +189,11 @@ book.add_record(grigi_record)
 book.add_record(selim_record)
 book.add_record(jane_record)
 
-
-
-# Виведення всіх записів у книзі
-# for name, record in book.data.items():
-#     print(record)
-
-# Знаходження та редагування телефону для John
-# john = book.find("John")
-# john.edit_phone("1234567890", "1112223333")
-
-# print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-
-# Пошук конкретного телефону у записі John
-# found_phone = john.find_phone("5555555555")
-# print(f"{john.name}: {found_phone}")  # John: 5555555555
-
-
-
 # Использование итератора
 for record in book:
     print(record)
 
 # Использование метода для получения представления для N записей
-n = 2  # задайте желаемое количество записей
-for record in book.iter_n_records(n):
+n = 1  # задайте желаемое количество записей
+for record in book.iterator(n):
     print(record)
