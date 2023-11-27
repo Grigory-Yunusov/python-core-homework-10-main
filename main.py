@@ -10,7 +10,7 @@ class Field:
         return self._value
 
     @value.setter
-    def values(self, new_value):
+    def value(self, new_value):
         # Дополнительная логика в сеттере.
         self._value = new_value
 
@@ -20,6 +20,7 @@ class Field:
     def validate(self):
         pass
 
+
 class Name(Field):
 
     def __init__(self, name):
@@ -27,7 +28,6 @@ class Name(Field):
 
 
 class Phone(Field):
-
 
     def __init__(self, phone):
         super().__init__(phone)
@@ -37,7 +37,6 @@ class Phone(Field):
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
             raise ValueError("Phone must be a 10-digit number.")
-
 
     @Field.value.setter
     def value(self, new_value):
@@ -148,19 +147,90 @@ class AddressBook(UserDict):
 
 # Пример использования
 phone_field = Phone("123456789")
-print(phone_field.value)  # Вывод значения через getter
+print(phone_field.value)  # Вивід значення через getter
 
-# Попытка установить некорректное значение для номера телефона
+# birthday_field.value "1992-11-28"
+
+# спроба встановити не коректний номер телефону
 try:
-    phone_field.value = "987-654-321"  # Это не число, вызовет ValueError
+    phone_field.value = "987-654-321"  # Це не число, викликає ValueError
 except ValueError as e:
     print(e)
 
 birthday_field = Birthday("1990-01-01")
-print(birthday_field.value)  # Вывод значения через getter
+print(birthday_field.value)  # Вивід значення через getter
 
-# Попытка установить некорректное значение для дня рождения
+# спроба встановити не коректне значенне для дня народження
 try:
     birthday_field.value = "1990/01/01"  # Некорректный формат даты, вызовет ValueError
 except ValueError as e:
     print(e)
+
+
+# Пример использования
+name_field = Name("John Doe")
+print(name_field.value)  # Вывод значения через getter
+
+name_field.value = "Jane Doe"  # Изменение значения через setter
+print(name_field.value)  # Вывод измененного значения
+
+phone_field = Phone("123456789")
+print(phone_field.value)  # Вывод значения через getter
+
+phone_field.value = "987654321"  # Изменение значения через setter
+print(phone_field.value)  # Вывод измененного значения
+
+
+
+# Створення нової адресної книги
+book = AddressBook()
+
+# Створення запису
+john_record = Record("John")
+john_record.add_phone("1234567890")
+john_record.add_phone("5555555555")
+
+grigi_record = Record("Grigi")
+grigi_record.add_phone("8098465323")
+grigi_record.add_phone("5000000000")
+
+selim_record = Record("Selim")
+selim_record.add_phone("8098465323")
+selim_record.add_phone("5000000000")
+
+jane_record = Record("Jane")
+jane_record.add_phone("9876543210")
+
+# Додавання запису John до адресної книги
+book.add_record(john_record)
+book.add_record(grigi_record)
+book.add_record(selim_record)
+book.add_record(jane_record)
+
+
+
+# Виведення всіх записів у книзі
+# for name, record in book.data.items():
+#     print(record)
+
+# Знаходження та редагування телефону для John
+# john = book.find("John")
+# john.edit_phone("1234567890", "1112223333")
+
+# print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
+
+# Пошук конкретного телефону у записі John
+# found_phone = john.find_phone("5555555555")
+# print(f"{john.name}: {found_phone}")  # John: 5555555555
+
+# Видалення запису Jane
+# book.delete("Jane")
+
+# Использование итератора
+for record in book:
+    print(record)
+
+# Использование метода для получения представления для N записей
+n = 2  # задайте желаемое количество записей
+for record in book.iter_n_records(n):
+    print(record)
