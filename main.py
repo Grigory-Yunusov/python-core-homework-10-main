@@ -189,11 +189,14 @@ book.add_record(grigi_record)
 book.add_record(selim_record)
 book.add_record(jane_record)
 
-# Использование итератора
+# використання ітератора
 for record in book:
     print(record)
 
-# Использование метода для получения представления для N записей
-n = 1  # задайте желаемое количество записей
-for record in book.iterator(n):
-    print(record)
+print(">>>>>>>>>>>>>>>>")
+
+# використання методу для отримання  уявлення для N записей
+
+for item in book.iterator(item_number=3):
+    for record in item:
+        print(record)
