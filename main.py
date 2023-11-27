@@ -45,9 +45,6 @@ class Phone(Field):
 
 
 class Birthday(Field):
-    def __init__(self, birthdate):
-        super().__init__(birthdate)
-        self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
     @Field.value.setter
     def value(self, new_value):
