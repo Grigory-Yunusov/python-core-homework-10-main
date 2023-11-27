@@ -223,8 +223,7 @@ book.add_record(jane_record)
 # found_phone = john.find_phone("5555555555")
 # print(f"{john.name}: {found_phone}")  # John: 5555555555
 
-# Видалення запису Jane
-# book.delete("Jane")
+
 
 # Использование итератора
 for record in book:
