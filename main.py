@@ -1,6 +1,8 @@
 from collections import UserDict
 import re
 from datetime import datetime, timedelta
+
+
 class Field:
     def __init__(self, value):
         self._value = value
@@ -11,7 +13,6 @@ class Field:
 
     @value.setter
     def value(self, new_value):
-        # Дополнительная логика в сеттере.
         self._value = new_value
 
     def __str__(self):
@@ -22,17 +23,15 @@ class Field:
 
 
 class Name(Field):
-
     def __init__(self, name):
         super().__init__(name)
 
 
 class Phone(Field):
-
     def __init__(self, phone):
         super().__init__(phone)
         # if not re.match(r'^\d{10}$', str(self._value)):
-        #     raise ValueError("Phone must be a 100000000000000000-digit number.")
+        #     raise ValueError("Phone must be a 10-digit number.")
 
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
@@ -45,8 +44,9 @@ class Phone(Field):
         self._value = new_value
 
 
-class Birthday:
+class Birthday(Field):
     def __init__(self, birthdate):
+        super().__init__(birthdate)
         self._value = None
         self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
@@ -59,9 +59,6 @@ class Birthday:
             raise ValueError("Invalid date format!!! Use YYYY-MM-DD.")
 
         self._value = new_value
-
-
-
 
 
 class Record:
@@ -136,7 +133,6 @@ class AddressBook(UserDict):
         return iter(self.data.values())
 
     def iter_n_records(self, n):
-
         count = 0
         for record in self.data.values():
             yield record
@@ -149,8 +145,6 @@ class AddressBook(UserDict):
 phone_field = Phone("123456789")
 print(phone_field.value)  # Вивід значення через getter
 
-# birthday_field.value "1992-11-28"
-
 # спроба встановити не коректний номер телефону
 try:
     phone_field.value = "987-654-321"  # Це не число, викликає ValueError
@@ -162,23 +156,23 @@ print(birthday_field.value)  # Вивід значення через getter
 
 # спроба встановити не коректне значенне для дня народження
 try:
-    birthday_field.value = "1990/01/01"  # Некорректный формат даты, вызовет ValueError
+    birthday_field.value = "1990/01/01"  # Некорректний формат дати, визиває ValueError
 except ValueError as e:
     print(e)
 
 
 # Пример использования
-name_field = Name("John Doe")
-print(name_field.value)  # Вывод значения через getter
+doe = Name("John Doe")
+print(doe.value)  # Вывод значения через getter
 
-name_field.value = "Jane Doe"  # Изменение значения через setter
-print(name_field.value)  # Вывод измененного значения
+doe.value = "Jane Doe"  # Изменение значения через setter
+print(doe.value)  # Вывод измененного значения
 
-phone_field = Phone("123456789")
-print(phone_field.value)  # Вывод значения через getter
+doe_phone = Phone("123456789")
+print(doe_phone.value)  # Вывод значения через getter
 
-phone_field.value = "987654321"  # Изменение значения через setter
-print(phone_field.value)  # Вывод измененного значения
+doe_phone.value = "987654321"  # Изменение значения через setter
+print(doe_phone.value)  # Вывод измененного значения
 
 
 
