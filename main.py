@@ -31,8 +31,8 @@ class Phone(Field):
 
     def __init__(self, phone):
         super().__init__(phone)
-        if not re.match(r'^\d{10}$', str(self._value)):
-            raise ValueError("Phone must be a 10-digit number.")
+        # if not re.match(r'^\d{10}$', str(self._value)):
+        #     raise ValueError("Phone must be a 100000000000000000-digit number.")
 
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
@@ -48,10 +48,12 @@ class Phone(Field):
 
 class Birthday:
     def __init__(self, birthdate):
+        self._value = None
         self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
     @Field.value.setter
     def value(self, new_value):
+        
         try:
             datetime.strptime(new_value, "%Y-%m-%d")
         except ValueError:
@@ -143,36 +145,22 @@ class AddressBook(UserDict):
             if count >= n:
                 break
 
-if __name__ == "__main__":
-       # Створення нової адресної книги
-    book = AddressBook()
 
-        # Створення запису для John
-    john_record = Record("John")
-    john_record.add_phone("1234567890")
-    john_record.add_phone("5555555555")
+# Пример использования
+phone_field = Phone("123456789")
+print(phone_field.value)  # Вывод значения через getter
 
-        # Додавання запису John до адресної книги
-    book.add_record(john_record)
+# Попытка установить некорректное значение для номера телефона
+try:
+    phone_field.value = "987-654-321"  # Это не число, вызовет ValueError
+except ValueError as e:
+    print(e)
 
-        # Створення та додавання нового запису для Jane
-    jane_record = Record("Jane")
-    jane_record.add_phone("9876543210")
-    book.add_record(jane_record)
+birthday_field = Birthday("1990-01-01")
+print(birthday_field.value)  # Вывод значения через getter
 
-        # Виведення всіх записів у книзі
-    for name, record in book.data.items():
-        print(record)
-
-        # Знаходження та редагування телефону для John
-    john = book.find("John")
-    john.edit_phone("1234567890", "1112223333")
-
-    print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-
-        # Пошук конкретного телефону у записі John
-    found_phone = john.find_phone("5555555555")
-    print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
-
-        # Видалення запису Jane
-    book.delete("Jane")
+# Попытка установить некорректное значение для дня рождения
+try:
+    birthday_field.value = "1990/01/01"  # Некорректный формат даты, вызовет ValueError
+except ValueError as e:
+    print(e)
