@@ -1,11 +1,11 @@
 from collections import UserDict
-import re
 from datetime import datetime, timedelta
 
 
 class Field:
     def __init__(self, value):
-        self._value = value
+        self._value = None
+        self.value = value
 
     @property
     def value(self):
@@ -28,11 +28,6 @@ class Name(Field):
 
 
 class Phone(Field):
-    def __init__(self, phone):
-        super().__init__(phone)
-        # if not re.match(r'^\d{10}$', str(self._value)):
-        #     raise ValueError("Phone must be a 10-digit number.")
-
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
             raise ValueError("Phone must be a 10-digit number.")
@@ -180,11 +175,16 @@ jane_record = Record("Jane")
 jane_record.add_phone("9876543210")
 jane_record.add_phone("7576541010")
 
+alex_record = Record("Alex")
+alex_record.add_phone("7834567000")
+alex_record.add_phone("7875757005")
+
 # Додавання запису John до адресної книги
 book.add_record(john_record)
 book.add_record(grigi_record)
 book.add_record(selim_record)
 book.add_record(jane_record)
+book.add_record(alex_record)
 
 # використання ітератора
 for record in book:
