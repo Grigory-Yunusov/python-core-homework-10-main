@@ -28,11 +28,6 @@ class Name(Field):
 
 
 class Phone(Field):
-    def __init__(self, phone):
-        super().__init__(phone)
-        # if not re.match(r'^\d{10}$', str(self._value)):
-        #     raise ValueError("Phone must be a 10-digit number.")
-
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
             raise ValueError("Phone must be a 10-digit number.")
