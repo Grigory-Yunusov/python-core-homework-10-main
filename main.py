@@ -42,9 +42,6 @@ class Phone(Field):
 
 
 class Birthday(Field):
-    def __init__(self, birthdate):
-        super().__init__(birthdate)
-        self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
     @Field.value.setter
     def value(self, new_value):
@@ -96,16 +93,16 @@ class Record:
         return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
 
     def days_to_birthday(self):
-        if self.birthday:
-            today = datetime.now().date()
-            next_birthday = datetime(today.year, self.birthday.birthdate.month, self.birthday.birthdate.day).date()
-            if today > next_birthday:
-                next_birthday = datetime(today.year + 1, self.birthday.birthdate.month, self.birthday.birthdate.day).date()
+        if not self.birthday:
+                return -1
 
-            days_until_birthday = (next_birthday - today).days
-            return days_until_birthday
-        else:
-            return None
+        today = datetime.now().date()
+        next_birthday = datetime.strptime(self.birthday.value, "%Y-%m-%d").date().replace(year=today.year)
+        if today > next_birthday:
+            next_birthday = next_birthday.replace(year=today.year + 1)
+
+        days_until_birthday = (next_birthday - today).days
+        return days_until_birthday
 
 
 class AddressBook(UserDict):
