@@ -1,5 +1,5 @@
 from collections import UserDict
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class Field:
@@ -28,6 +28,7 @@ class Name(Field):
 
 
 class Phone(Field):
+
     def validate(self):
         if self._value and not (isinstance(self._value, str) and len(self._value) == 10 and self._value.isdigit()):
             raise ValueError("Phone must be a 10-digit number.")
@@ -37,13 +38,17 @@ class Phone(Field):
         if not isinstance(new_value, str) or not new_value.isdigit():
             raise ValueError("Phone must be a string containing only digits.")
         self._value = new_value
+        self.validate()
 
 
 class Birthday(Field):
+    def __init__(self, birthdate):
+        super().__init__(birthdate)
+        self.birthdate = datetime.strptime(birthdate, "%Y-%m-%d").date()
 
     @Field.value.setter
     def value(self, new_value):
-        
+
         try:
             datetime.strptime(new_value, "%Y-%m-%d")
         except ValueError:
@@ -57,6 +62,7 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday) if birthday else None
+
     def add_phone(self, phone):
         phone_field = Phone(phone)
         phone_field.validate()
@@ -78,8 +84,6 @@ class Record:
                 p.value = new_phone
                 return
         raise ValueError("not on the list!!")
-        
-
 
     def find_phone(self, phone):
         for p in self.phones:
@@ -91,8 +95,7 @@ class Record:
     def __str__(self):
         return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
 
-
-    def  days_to_birthday(self):
+    def days_to_birthday(self):
         if self.birthday:
             today = datetime.now().date()
             next_birthday = datetime(today.year, self.birthday.birthdate.month, self.birthday.birthdate.day).date()
@@ -115,6 +118,7 @@ class AddressBook(UserDict):
             return self.data[term]
         else:
             return None
+
     def delete(self, name):
         if name in self.data:
             del self.data[name]
@@ -135,7 +139,7 @@ class AddressBook(UserDict):
 
 
 # Перевірка на коректність веденого номера телефону setter для value класу Phone.
-phone_field = Phone("123456789")
+phone_field = Phone("1234567890")
 print(phone_field.value)  # Вивід значення через getter
 
 # спроба встановити не коректний номер телефону
@@ -153,7 +157,6 @@ try:
     birthday_field.value = "1990/01/01"  # Некорректний формат дати, визиває ValueError
 except ValueError as e:
     print(e)
-
 
 # Створення нової адресної книги
 book = AddressBook()
@@ -197,3 +200,8 @@ print(">>>>>>>>>>>>>>>>")
 for item in book.iterator(item_number=3):
     for record in item:
         print(record)
+
+
+record_with_birthday = Record("John", "2023-01-15")
+days_until_birthday = record_with_birthday.days_to_birthday()
+print(f"До дня народження залишилось {days_until_birthday} днів.")
