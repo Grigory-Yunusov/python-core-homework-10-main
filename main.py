@@ -1,5 +1,9 @@
 from collections import UserDict
 from datetime import datetime
+import cmd
+import pickle
+from pathlib import Path
+from typing import List
 
 
 class Field:
@@ -90,11 +94,14 @@ class Record:
         return None
 
     def __str__(self):
-        return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
+        return f"Record(name={self.name.value}, birthday={self.birthday}, phones={[phone.value for phone in self.phones]})"
+
+    # def __str__(self):
+    #     return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
 
     def days_to_birthday(self):
         if not self.birthday:
-                return -1
+            return -1
 
         today = datetime.now().date()
         next_birthday = datetime.strptime(self.birthday.value, "%Y-%m-%d").date().replace(year=today.year)
@@ -106,6 +113,12 @@ class Record:
 
 
 class AddressBook(UserDict):
+    def __init__(self, file="adress_book.pkl"):
+        self.faile = Path(file)
+        self.record_id = 0
+        self.record = {}
+        super().__init__()
+
     def add_record(self, record):
         self.data[record.name.value] = record
 
@@ -134,71 +147,140 @@ class AddressBook(UserDict):
                 counter = 0
                 result = []
 
+    def dump(self):
+        with open(self.file, "wb") as file:
+            pickle.dump((self.record_id, self.record), file)
 
-# Перевірка на коректність веденого номера телефону setter для value класу Phone.
-phone_field = Phone("1234567890")
-print(phone_field.value)  # Вивід значення через getter
+    def load(self):
+        if not self.file.exist():
+            return
+        with open(self.file, "rb") as file:
+            self.record_id, self.record = pickle.load(file)
 
-# спроба встановити не коректний номер телефону
-try:
-    phone_field.value = "987-654-321"  # Це не число, викликає ValueError
-except ValueError as e:
-    print(e)
+    def find_by_term(self, term: str) -> List[Record]:
+        matching_records = []
 
-# Перевірка на коректність веденого дня народження setter для value класу Birthday.
-birthday_field = Birthday("1990-01-01")
-print(birthday_field.value)  # Вивід значення через getter
+        # Check if the term matches any phone number
+        for record in self.data.values():
+            for phone in record.phones:
+                if term in phone.value:
+                    matching_records.append(record)
 
-# спроба встановити не коректне значенне для дня народження
-try:
-    birthday_field.value = "1990/01/01"  # Некорректний формат дати, визиває ValueError
-except ValueError as e:
-    print(e)
+        # Check if the term matches any contact name
+        matching_records.extend(
+            record for record in self.data.values() if term.lower() in record.name.value.lower()
+        )
 
-# Створення нової адресної книги
-book = AddressBook()
+        return matching_records
 
-# Створення запису
-john_record = Record("John")
-john_record.add_phone("1234567890")
-john_record.add_phone("7575757575")
 
-grigi_record = Record("Grigi")
-grigi_record.add_phone("8098465323")
-grigi_record.add_phone("2345678910")
+    if __name__ == "__main__":
 
-selim_record = Record("Selim")
-selim_record.add_phone("7098461111")
-selim_record.add_phone("5010101010")
+        def find(self, term):
+            matching_records = self.find_by_term(term)
+            if matching_records:
+                return matching_records
+            else:
+                return None
 
-jane_record = Record("Jane")
-jane_record.add_phone("9876543210")
-jane_record.add_phone("7576541010")
+class Controller(cmd.Cmd):
+    def __init__(self):
+        super().__init__()
+        self.book = AddressBook
 
-alex_record = Record("Alex")
-alex_record.add_phone("7834567000")
-alex_record.add_phone("7875757005")
+    def exit(self, arg):
+        self.book.dump()
+        return True
 
-# Додавання запису John до адресної книги
-book.add_record(john_record)
-book.add_record(grigi_record)
-book.add_record(selim_record)
-book.add_record(jane_record)
-book.add_record(alex_record)
+    def save(self, arg):
+        self.book.dump()
+        print("Адресна книга збережена!")
 
-# використання ітератора
-for record in book:
-    print(record)
+    def load(self, arg):
+        self.book.load()
+        print("Адресна книга відновлена")
 
-print(">>>>>>>>>>>>>>>>")
 
-# використання методу для отримання  уявлення для N записей
 
-for item in book.iterator(item_number=3):
-    for record in item:
+
+
+
+
+
+if __name__ == "__main__":
+
+    # Перевірка на коректність веденого номера телефону setter для value класу Phone.
+    phone_field = Phone("1234567890")
+    print(phone_field.value)  # Вивід значення через getter
+
+    # спроба встановити не коректний номер телефону
+    try:
+        phone_field.value = "987-654-321"  # Це не число, викликає ValueError
+    except ValueError as e:
+        print(e)
+
+    # Перевірка на коректність веденого дня народження setter для value класу Birthday.
+    birthday_field = Birthday("1990-01-01")
+    print(birthday_field.value)  # Вивід значення через getter
+
+    # спроба встановити не коректне значенне для дня народження
+    try:
+        birthday_field.value = "1990/01/01"  # Некорректний формат дати, визиває ValueError
+    except ValueError as e:
+        print(e)
+
+    # Створення нової адресної книги
+    book = AddressBook()
+
+    # Створення запису
+    john_record = Record("John")
+    john_record.add_phone("1234567890")
+    john_record.add_phone("7575757575")
+
+    grigi_record = Record("Grigi")
+    grigi_record.add_phone("8098465323")
+    grigi_record.add_phone("2345678910")
+
+    selim_record = Record("Selim")
+    selim_record.add_phone("7098461111")
+    selim_record.add_phone("5010101010")
+
+    jane_record = Record("Jane")
+    jane_record.add_phone("9876543210")
+    jane_record.add_phone("7576541010")
+
+    alex_record = Record("Alex")
+    alex_record.add_phone("7834567000")
+    alex_record.add_phone("7875757005")
+
+    # Додавання запису до адресної книги
+    book.add_record(john_record)
+    book.add_record(grigi_record)
+    book.add_record(selim_record)
+    book.add_record(jane_record)
+    book.add_record(alex_record)
+
+    # використання ітератора
+    for record in book:
         print(record)
 
+    print(">>>>>>>>>>>>>>>>")
 
-record_with_birthday = Record("John", "2023-01-15")
-days_until_birthday = record_with_birthday.days_to_birthday()
-print(f"До дня народження залишилось {days_until_birthday} днів.")
+    # використання методу для отримання  уявлення для N записей
+
+    for item in book.iterator(item_number=3):
+        for record in item:
+            print(record)
+
+    record_with_birthday = Record("John", "2023-01-15")
+    days_until_birthday = record_with_birthday.days_to_birthday()
+    print(f"До дня народження залишилось {days_until_birthday} днів.")
+
+    print(">>>>>>>>>>>>>>>>")
+
+    search_term_1 = "Jo"
+    results_1 = book.find(search_term_1)
+
+    print(f"Search results for '{search_term_1}':")
+    for result in results_1:
+        print(result)
