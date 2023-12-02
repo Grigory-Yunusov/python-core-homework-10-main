@@ -114,7 +114,7 @@ class Record:
 
 class AddressBook(UserDict):
     def __init__(self, file="adress_book.pkl"):
-        self.faile = Path(file)
+        self.file = Path(file)
         self.record_id = 0
         self.record = {}
         super().__init__()
@@ -152,7 +152,7 @@ class AddressBook(UserDict):
             pickle.dump((self.record_id, self.record), file)
 
     def load(self):
-        if not self.file.exist():
+        if not self.file.exists():
             return
         with open(self.file, "rb") as file:
             self.record_id, self.record = pickle.load(file)
@@ -278,9 +278,9 @@ if __name__ == "__main__":
 
     print(">>>>>>>>>>>>>>>>")
 
-    search_term_1 = "Jo"
+    search_term_1 = "7575"
     results_1 = book.find(search_term_1)
 
-    print(f"Search results for '{search_term_1}':")
+    print(f"результат для пошуку: '{search_term_1}':")
     for result in results_1:
         print(result)
