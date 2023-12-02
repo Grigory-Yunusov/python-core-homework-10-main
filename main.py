@@ -187,8 +187,6 @@ class AddressBook(UserDict):
 class Controller(cmd.Cmd):
     def __init__(self):
         super().__init__()
-        self.book = AddressBook
-        self.prompt = ">>>"
         self.intro = "Ласкаво просимо до Адресної Книги"
 
     def exit(self, arg):
@@ -212,9 +210,6 @@ class Controller(cmd.Cmd):
 
 
 if __name__ == "__main__":
-
-    controller = Controller()
-    controller.cmdloop()
 
     # Перевірка на коректність веденого номера телефону setter для value класу Phone.
     phone_field = Phone("1234567890")
