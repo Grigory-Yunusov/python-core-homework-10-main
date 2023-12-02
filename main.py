@@ -213,6 +213,9 @@ class Controller(cmd.Cmd):
 
 if __name__ == "__main__":
 
+    controller = Controller()
+    controller.cmdloop()
+
     # Перевірка на коректність веденого номера телефону setter для value класу Phone.
     phone_field = Phone("1234567890")
     print(phone_field.value)  # Вивід значення через getter
