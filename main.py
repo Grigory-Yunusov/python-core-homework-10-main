@@ -149,13 +149,14 @@ class AddressBook(UserDict):
 
     def dump(self):
         with open(self.file, "wb") as file:
-            pickle.dump((self.record_id, self.record), file)
+            pickle.dump((self.record_id, dict(self.data)), file)
 
     def load(self):
         if not self.file.exists():
             return
         with open(self.file, "rb") as file:
-            self.record_id, self.record = pickle.load(file)
+            self.record_id, data = pickle.load(file)
+            self.data.update(data)
 
     def find_by_term(self, term: str) -> List[Record]:
         matching_records = []
@@ -187,9 +188,12 @@ class Controller(cmd.Cmd):
     def __init__(self):
         super().__init__()
         self.book = AddressBook
+        self.prompt = ">>>"
+        self.intro = "Ласкаво просимо до Адресної Книги"
 
     def exit(self, arg):
         self.book.dump()
+        print("Вихід...")
         return True
 
     def save(self, arg):
