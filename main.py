@@ -113,6 +113,8 @@ class Record:
 
 
 class AddressBook(UserDict):
+    record_id = None
+
     def __init__(self, file="adress_book.pkl"):
         self.file = Path(file)
         self.record_id = 0
@@ -161,17 +163,12 @@ class AddressBook(UserDict):
     def find_by_term(self, term: str) -> List[Record]:
         matching_records = []
 
-        # Check if the term matches any phone number
         for record in self.data.values():
             for phone in record.phones:
                 if term in phone.value:
                     matching_records.append(record)
 
-        # Check if the term matches any contact name
-        matching_records.extend(
-            record for record in self.data.values() if term.lower() in record.name.value.lower()
-        )
-
+        matching_records.extend(record for record in self.data.values() if term.lower() in record.name.value.lower())
         return matching_records
 
 
@@ -187,34 +184,60 @@ class AddressBook(UserDict):
 class Controller(cmd.Cmd):
     def __init__(self):
         super().__init__()
-        self.book = AddressBook
+        self.book = AddressBook()
         self.prompt = ">>>"
         self.intro = "Ласкаво просимо до Адресної Книги"
 
-    def exit(self, arg):
+    def do_exit(self, arg):
         self.book.dump()
         print("Вихід...")
         return True
 
-    def save(self, arg):
+    def do_save(self, arg):
         self.book.dump()
         print("Адресна книга збережена!")
 
-    def load(self, arg):
+    def do_load(self, arg):
         self.book.load()
         print("Адресна книга відновлена")
 
+    def do_add(self, arg):
+        name, phone = arg.split(",")
+        record = Record(name.lower().strip(), phone.strip())
+        self.book.add_record(record)
+        print("Контакт створено.")
 
 
+        record = Record(name, phone, birthday)
+        self.book.add_record(record)
+        print("Record added.")
+
+    def do_list(self, arg):
+        if not self.book.data:
+            print("Адресна книга порожня.")
+        else:
+            for record_id, record in self.book.data.items():
+                phones = '; '.join(str(phone) for phone in record.phones)
+                birthday_info = f", День народження: {record.birthday.value}" if record.birthday else ""
+                print(f"{record_id}: {record.name.value}, {phones}{birthday_info}")
+
+    def do_find(self, arg):
+        term = input("Введіть термін для пошуку: ")
+        matching_records = self.book.find_by_term(term)
+        if matching_records:
+            for record in matching_records:
+                phones = ", ".join(phone.value for phone in record.phones )
+                birthday_info = f", День народження: {record.birthday.value}" if record.birthday else ""
+                print(f" {record.name.value}, {phones}{birthday_info}")
+        else:
+            print("Ничего не найдено.")
 
 
 
 
 
 if __name__ == "__main__":
-
     controller = Controller()
-    controller.cmdloop()
 
     # Перевірка на коректність веденого номера телефону setter для value класу Phone.
     phone_field = Phone("1234567890")
@@ -241,6 +264,7 @@ if __name__ == "__main__":
 
     # Створення запису
     john_record = Record("John")
+    john_record.birthday = Birthday("2011-01-15")
     john_record.add_phone("1234567890")
     john_record.add_phone("7575757575")
 
@@ -261,12 +285,12 @@ if __name__ == "__main__":
     alex_record.add_phone("7875757005")
 
     # Додавання запису до адресної книги
-    book.add_record(john_record)
-    book.add_record(grigi_record)
-    book.add_record(selim_record)
-    book.add_record(jane_record)
-    book.add_record(alex_record)
-
+    controller.book.add_record(john_record)
+    controller.book.add_record(grigi_record)
+    controller.book.add_record(selim_record)
+    controller.book.add_record(jane_record)
+    controller.book.add_record(alex_record)
+    controller.cmdloop()
     # використання ітератора
     for record in book:
         print(record)
@@ -286,8 +310,11 @@ if __name__ == "__main__":
     print(">>>>>>>>>>>>>>>>")
 
     search_term_1 = "7575"
-    results_1 = book.find(search_term_1)
+    results_1 = controller.book.find(search_term_1)
 
     print(f"результат для пошуку: '{search_term_1}':")
     for result in results_1:
         print(result)
+
+
+
