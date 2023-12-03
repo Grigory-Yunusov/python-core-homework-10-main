@@ -230,7 +230,7 @@ class Controller(cmd.Cmd):
                 birthday_info = f", День народження: {record.birthday.value}" if record.birthday else ""
                 print(f" {record.name.value}, {phones}{birthday_info}")
         else:
-            print("Ничего не найдено.")
+            print("Ничего не найдено!!!.")
 
 
 
