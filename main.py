@@ -69,6 +69,10 @@ class Record:
         phone_field.validate()
         self.phones.append(phone_field)
 
+    def add_birthday(self, birthday):
+        new_birthday = Birthday(birthday)
+        self.birthday = new_birthday
+
     def remove_phone(self, phone):
         self.phones = list(filter(lambda p: p.value != phone, self.phones))
 
@@ -172,14 +176,14 @@ class AddressBook(UserDict):
         return matching_records
 
 
-    if __name__ == "__main__":
-
-        def find(self, term):
-            matching_records = self.find_by_term(term)
-            if matching_records:
-                return matching_records
-            else:
-                return None
+    # if __name__ == "__main__":
+    #
+    #     def find(self, term):
+    #         matching_records = self.find_by_term(term)
+    #         if matching_records:
+    #             return matching_records
+    #         else:
+    #             return None
 
 class Controller(cmd.Cmd):
     def __init__(self):
@@ -201,16 +205,24 @@ class Controller(cmd.Cmd):
         self.book.load()
         print("Адресна книга відновлена")
 
-    def do_add(self, arg):
-        name, phone = arg.split(",")
-        record = Record(name.lower().strip(), phone.strip())
-        self.book.add_record(record)
-        print("Контакт створено.")
+    def do_add(self, line):
+        data = line.split(",")
+        name = data[0].strip().capitalize()
+        phones = [phone.strip() for phone in data[1:3]]
+        birthday = data[3].strip() if len(data) > 3 else None
+        try:
+            record = Record(name)
+            for phone in phones:
+                record.add_phone(phone)
+            if birthday:
+                record.add_birthday(birthday)
+
+            self.book.add_record(record)
+            print("Новий контакт успішно збережено!")
+        except ValueError as e:
+            print(f"помилка при створенні контакту: {e}")
 
 
-        record = Record(name, phone)
-        self.book.add_record(record)
-        print("Record added.")
 
     def do_list(self, arg):
         if not self.book.data:
@@ -232,7 +244,20 @@ class Controller(cmd.Cmd):
         else:
             print("Ничего не найдено!!!.")
 
+    def do_birthday(self, line):
+        name = line.strip().capitalize()
+        record = self.book.find(name)
+        if record:
+            days_until_birthday = record.days_to_birthday()
+            if days_until_birthday > 0:
+                print(f"до дня народження контакту {name}, залишилось {days_until_birthday} днів")
+            elif days_until_birthday == 0:
+                print(f"День народження контакту {name} сьогодні!!!")
+            else:
+                print(f"день народження не додано в книгу контактів")
 
+        else:
+            print(f"контакт {name} не знайдений")
 
 
 
@@ -264,7 +289,7 @@ if __name__ == "__main__":
 
     # Створення запису
     john_record = Record("John")
-    john_record.birthday = Birthday("2011-01-15")
+    john_record.birthday = Birthday("2011-12-03")
     john_record.add_phone("1234567890")
     john_record.add_phone("7575757575")
 
@@ -303,18 +328,25 @@ if __name__ == "__main__":
         for record in item:
             print(record)
 
-    record_with_birthday = Record("John", "2023-01-15")
-    days_until_birthday = record_with_birthday.days_to_birthday()
-    print(f"До дня народження залишилось {days_until_birthday} днів.")
+    # record_with_birthday = Record("John", "2023-01-15")
+    # days_until_birthday = record_with_birthday.days_to_birthday()
+    # print(f"До дня народження залишилось {days_until_birthday} днів.")
+    #
+    # print(">>>>>>>>>>>>>>>>")
+    #
+    # search_term_1 = "7575"
+    # results_1 = controller.book.find(search_term_1)
+    #
+    # print(f"результат для пошуку: '{search_term_1}':")
+    # for result in results_1:
+    #     print(result)
 
-    print(">>>>>>>>>>>>>>>>")
-
-    search_term_1 = "7575"
-    results_1 = controller.book.find(search_term_1)
-
-    print(f"результат для пошуку: '{search_term_1}':")
-    for result in results_1:
-        print(result)
 
 
-
+# Ласкаво просимо до Адресної Книги
+# >>>add ron,1234567890,1992-12-12
+# помилка при створенні контакту: Phone must be a string containing only digits.
+# >>>add ron, 1234567890,0987654321
+# Новий контакт успішно збережено!
+# >>>add roki, 1234567890,0987654321, 1992-12-12
+# Новий контакт успішно збережено!
