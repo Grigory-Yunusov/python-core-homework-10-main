@@ -208,7 +208,7 @@ class Controller(cmd.Cmd):
         print("Контакт створено.")
 
 
-        record = Record(name, phone, birthday)
+        record = Record(name, phone)
         self.book.add_record(record)
         print("Record added.")
 
